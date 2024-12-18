@@ -3,13 +3,22 @@ package refatoracao;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProntuarioController{
 
     private Prontuario prontuario;
+    private Calculadora calculadora;
 
 	private Set<Procedimento> procedimentos = new HashSet<>();
 
@@ -28,6 +37,7 @@ public class ProntuarioController{
 
     public ProntuarioController(Prontuario prontuario) {
         this.prontuario = prontuario;
+        this.calculadora = new Calculadora();
     }
 
     public String imprimaConta() {
@@ -42,20 +52,20 @@ public class ProntuarioController{
 			switch (prontuario.getInternacao().getTipoLeito()) {
 				case ENFERMARIA:
 					if (prontuario.getInternacao().getQtdeDias() <= 3) {
-						valorDiarias += 40.00 * prontuario.getInternacao().getQtdeDias(); // Internação Básica
+						valorDiarias = calculadora.multiplicar(40.00f, prontuario.getInternacao().getQtdeDias()); 
 					} else if (prontuario.getInternacao().getQtdeDias() <= 8) {
-						valorDiarias += 35.00 * prontuario.getInternacao().getQtdeDias(); // Internação Média
+						valorDiarias = calculadora.multiplicar(35.00f, prontuario.getInternacao().getQtdeDias()); 
 					} else {
-						valorDiarias += 30.00 * prontuario.getInternacao().getQtdeDias(); // Internação Grave
+						valorDiarias = calculadora.multiplicar(35.00f, prontuario.getInternacao().getQtdeDias()); 
 					}
 					break;
 				case APARTAMENTO:
 					if (prontuario.getInternacao().getQtdeDias() <= 3) {
-						valorDiarias += 100.00 * prontuario.getInternacao().getQtdeDias(); // Internação Básica
+						valorDiarias = calculadora.multiplicar(100.00f, prontuario.getInternacao().getQtdeDias()); 
 					} else if (prontuario.getInternacao().getQtdeDias() <= 8) {
-						valorDiarias += 90.00 * prontuario.getInternacao().getQtdeDias();  // Internação Média
+						valorDiarias += 90.00 * prontuario.getInternacao().getQtdeDias();  
 					} else {
-						valorDiarias += 80.00 * prontuario.getInternacao().getQtdeDias();  // Internação Grave
+						valorDiarias = calculadora.multiplicar(80.00f, prontuario.getInternacao().getQtdeDias());  
 					}
 					break;
 			}
@@ -65,17 +75,17 @@ public class ProntuarioController{
 			switch (procedimento.getTipoProcedimento()) {
 				case BASICO:
 					qtdeProcedimentosBasicos++;
-					valorTotalProcedimentos += 50.00;
+					valorTotalProcedimentos = calculadora.somar(valorTotalProcedimentos, 50.00f);
 					break;
 
 				case COMUM:
 					qtdeProcedimentosComuns++;
-					valorTotalProcedimentos += 150.00;
+					valorTotalProcedimentos = calculadora.somar(valorTotalProcedimentos, 150.00f);
 					break;
 
 				case AVANCADO:
 					qtdeProcedimentosAvancados++;
-					valorTotalProcedimentos += 500.00;
+					valorTotalProcedimentos = calculadora.somar(valorTotalProcedimentos, 500.00f);
 					break;
 			}
 		}
@@ -113,7 +123,7 @@ public class ProntuarioController{
 	   }
    }
 
-   // Finalizar a conta
+    // Finalizar a conta
     conta.append("\n\nVolte sempre, a casa é sua!")
 		.append("\n----------------------------------------------------------------------------------------------");
 
@@ -128,64 +138,57 @@ public class ProntuarioController{
             while ((linha = reader.readLine()) != null) {
                 if (cabecalho) {
                     cabecalho = false;
-                    continue; // Ignora o cabeçalho
+                    continue; 
                 }
 
                 String[] dados = linha.split(",");
                 if (dados.length < 4) {
-                    continue; // Ignora linhas mal formatadas
+                    continue; 
                 }
 
-                // Nome do paciente
                 String nomePaciente = dados[0].trim();
                 prontuario.setNomePaciente(nomePaciente);
 
-                // Tipo de Leito
                 TipoLeito tipoLeito = null;
                 if (dados[1] != null && !dados[1].trim().isEmpty()) {
                     try {
                         tipoLeito = TipoLeito.valueOf(dados[1].trim());
                     } catch (IllegalArgumentException e) {
-                        // Tipo de leito inválido
+                        
                     }
                 }
 
-                // Quantidade de dias de internação
                 int qtdeDiasInternacao = -1;
                 if (dados[2] != null && !dados[2].trim().isEmpty()) {
                     try {
                         qtdeDiasInternacao = Integer.parseInt(dados[2].trim());
                     } catch (NumberFormatException e) {
-                        // Quantidade de dias inválida
+                        
                     }
                 }
 
-                // Tipo de Procedimento
                 TipoProcedimento tipoProcedimento = null;
                 if (dados[3] != null && !dados[3].trim().isEmpty()) {
                     try {
                         tipoProcedimento = TipoProcedimento.valueOf(dados[3].trim());
                     } catch (IllegalArgumentException e) {
-                        // Tipo de procedimento inválido
+
                     }
                 }
 
-                // Quantidade de procedimentos
                 int qtdeProcedimentos = -1;
                 if (dados.length == 5 && dados[4] != null && !dados[4].trim().isEmpty()) {
                     try {
                         qtdeProcedimentos = Integer.parseInt(dados[4].trim());
                     } catch (NumberFormatException e) {
-                        // Quantidade de procedimentos inválida
+                        
                     }
                 }
 
-                // Configura a internação, se houver
                 if (tipoLeito != null && qtdeDiasInternacao > 0) {
                     prontuario.setInternacao(new Internacao(tipoLeito, qtdeDiasInternacao));
                 }
 
-                // Adiciona os procedimentos
                 if (tipoProcedimento != null && qtdeProcedimentos > 0) {
                     for (int i = 0; i < qtdeProcedimentos; i++) {
                         prontuario.addProcedimento(new Procedimento(tipoProcedimento));
@@ -195,6 +198,47 @@ public class ProntuarioController{
         }
 
         return prontuario;
+    }
+
+    public String salveProntuario() throws IOException {
+    
+        List<String> linhas = new ArrayList<>();
+        
+        linhas.add("nome_paciente,tipo_leito,qtde_dias_internacao,tipo_procedimento,qtde_procedimentos");
+
+        String linhaInternacao = prontuario.getNomePaciente() + ",";
+
+        if (prontuario.getInternacao() != null) {
+            linhaInternacao += prontuario.getInternacao().getTipoLeito() + ","
+                    + prontuario.getInternacao().getQtdeDias() + ",,";
+            linhas.add(linhaInternacao);
+        } else {
+            linhaInternacao += ",,,";
+            linhas.add(linhaInternacao);
+        }
+
+        if (prontuario.getProcedimentos().size() > 0) {
+            Map<TipoProcedimento, Long> procedimentosAgrupados = prontuario.getProcedimentos().stream()
+                    .collect(Collectors.groupingBy(Procedimento::getTipoProcedimento, Collectors.counting()));
+            
+            List<TipoProcedimento> procedimentosOrdenados = new ArrayList<>(procedimentosAgrupados.keySet());
+            Collections.sort(procedimentosOrdenados);
+
+            for (TipoProcedimento tipo : procedimentosOrdenados) {
+                String linhaProcedimento = prontuario.getNomePaciente() + ",,," + tipo + ","
+                        + procedimentosAgrupados.get(tipo);
+                linhas.add(linhaProcedimento);
+            }
+        } else {
+            linhas.add(prontuario.getNomePaciente() + ",,,,");
+        }
+
+        Path path = Paths.get(prontuario.getNomePaciente().replaceAll(" ", "_")
+                .concat(String.valueOf(System.currentTimeMillis())).concat(".csv"));
+
+        Files.write(path, linhas);
+
+        return path.toString();
     }
     
 }
