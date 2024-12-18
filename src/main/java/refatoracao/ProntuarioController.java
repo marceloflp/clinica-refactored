@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ProntuarioController{
+public class ProntuarioController implements ProntuarioRepository {
 
     private Prontuario prontuario;
     private Calculadora calculadora;
@@ -40,6 +40,7 @@ public class ProntuarioController{
         this.calculadora = new Calculadora();
     }
 
+    @Override
     public String imprimaConta() {
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
@@ -101,7 +102,7 @@ public class ProntuarioController{
 			 .append(" em ").append(prontuario.getInternacao().getTipoLeito() == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria");
    }
 
-   if (prontuario.getProcedimentos().size() > 0) {
+   if (!prontuario.getProcedimentos().isEmpty()) {
 	   conta.append("\n\nValor Total Procedimentos:\t\t").append(formatter.format(valorTotalProcedimentos));
 
 	   if (qtdeProcedimentosBasicos > 0) {
@@ -130,6 +131,7 @@ public class ProntuarioController{
     return conta.toString();
 	}
 
+    @Override
     public Prontuario carregueProntuario(String arquivoCsv) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivoCsv))) {
             String linha;
@@ -200,6 +202,7 @@ public class ProntuarioController{
         return prontuario;
     }
 
+    @Override
     public String salveProntuario() throws IOException {
     
         List<String> linhas = new ArrayList<>();
@@ -217,7 +220,7 @@ public class ProntuarioController{
             linhas.add(linhaInternacao);
         }
 
-        if (prontuario.getProcedimentos().size() > 0) {
+        if(!prontuario.getProcedimentos().isEmpty()) {
             Map<TipoProcedimento, Long> procedimentosAgrupados = prontuario.getProcedimentos().stream()
                     .collect(Collectors.groupingBy(Procedimento::getTipoProcedimento, Collectors.counting()));
             
