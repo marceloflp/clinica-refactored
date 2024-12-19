@@ -64,7 +64,7 @@ public class ProntuarioController implements ProntuarioRepository {
 					if (prontuario.getInternacao().getQtdeDias() <= 3) {
 						valorDiarias = calculadora.multiplicar(100.00f, prontuario.getInternacao().getQtdeDias()); 
 					} else if (prontuario.getInternacao().getQtdeDias() <= 8) {
-						valorDiarias += 90.00 * prontuario.getInternacao().getQtdeDias();  
+                        valorDiarias = calculadora.multiplicar(90, prontuario.getInternacao().getQtdeDias());
 					} else {
 						valorDiarias = calculadora.multiplicar(80.00f, prontuario.getInternacao().getQtdeDias());  
 					}
@@ -95,40 +95,40 @@ public class ProntuarioController implements ProntuarioRepository {
 			.append(" tem valor total de __ ").append(formatter.format(valorDiarias + valorTotalProcedimentos))
 			.append(" __\n\nConforme os detalhes abaixo:");
 
-   if (prontuario.getInternacao() != null) {
-	   conta.append("\n\nValor Total Diárias:\t\t\t").append(formatter.format(valorDiarias));
-	   conta.append("\n\t\t\t\t\t").append(prontuario.getInternacao().getQtdeDias())
-			 .append(" diária").append(prontuario.getInternacao().getQtdeDias() > 1 ? "s" : "")
-			 .append(" em ").append(prontuario.getInternacao().getTipoLeito() == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria");
-   }
+        if (prontuario.getInternacao() != null) {
+            conta.append("\n\nValor Total Diárias:\t\t\t").append(formatter.format(valorDiarias));
+            conta.append("\n\t\t\t\t\t").append(prontuario.getInternacao().getQtdeDias())
+                    .append(" diária").append(prontuario.getInternacao().getQtdeDias() > 1 ? "s" : "")
+                    .append(" em ").append(prontuario.getInternacao().getTipoLeito() == TipoLeito.APARTAMENTO ? "apartamento" : "enfermaria");
+        }
 
-   if (!prontuario.getProcedimentos().isEmpty()) {
-	   conta.append("\n\nValor Total Procedimentos:\t\t").append(formatter.format(valorTotalProcedimentos));
+        if (!prontuario.getProcedimentos().isEmpty()) {
+            conta.append("\n\nValor Total Procedimentos:\t\t").append(formatter.format(valorTotalProcedimentos));
 
-	   if (qtdeProcedimentosBasicos > 0) {
-		   conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosBasicos)
-				.append(" procedimento").append(qtdeProcedimentosBasicos > 1 ? "s" : "")
-				.append(" básico").append(qtdeProcedimentosBasicos > 1 ? "s" : "");
-	   }
+            if (qtdeProcedimentosBasicos > 0) {
+                conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosBasicos)
+                        .append(" procedimento").append(qtdeProcedimentosBasicos > 1 ? "s" : "")
+                        .append(" básico").append(qtdeProcedimentosBasicos > 1 ? "s" : "");
+            }
 
-	   if (qtdeProcedimentosComuns > 0) {
-		   conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosComuns)
-				.append(" procedimento").append(qtdeProcedimentosComuns > 1 ? "s" : "")
-				.append(" comu").append(qtdeProcedimentosComuns > 1 ? "ns" : "m");
-	   }
+            if (qtdeProcedimentosComuns > 0) {
+                conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosComuns)
+                        .append(" procedimento").append(qtdeProcedimentosComuns > 1 ? "s" : "")
+                        .append(" comu").append(qtdeProcedimentosComuns > 1 ? "ns" : "m");
+            }
 
-	   if (qtdeProcedimentosAvancados > 0) {
-		   conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosAvancados)
-				.append(" procedimento").append(qtdeProcedimentosAvancados > 1 ? "s" : "")
-				.append(" avançado").append(qtdeProcedimentosAvancados > 1 ? "s" : "");
-	   }
-   }
+            if (qtdeProcedimentosAvancados > 0) {
+                conta.append("\n\t\t\t\t\t").append(qtdeProcedimentosAvancados)
+                        .append(" procedimento").append(qtdeProcedimentosAvancados > 1 ? "s" : "")
+                        .append(" avançado").append(qtdeProcedimentosAvancados > 1 ? "s" : "");
+            }
+        }
 
-    // Finalizar a conta
-    conta.append("\n\nVolte sempre, a casa é sua!")
-		.append("\n----------------------------------------------------------------------------------------------");
+        // Finalizar a conta
+        conta.append("\n\nVolte sempre, a casa é sua!")
+            .append("\n----------------------------------------------------------------------------------------------");
 
-    return conta.toString();
+        return conta.toString();
 	}
 
     @Override
